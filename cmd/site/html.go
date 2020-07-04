@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"christine.website/cmd/site/internal"
-	"christine.website/cmd/site/internal/blog"
+	"alexheld.io/cmd/site/internal"
+	"alexheld.io/cmd/site/internal/blog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"within.website/ln"

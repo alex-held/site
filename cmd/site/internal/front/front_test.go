@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"christine.website/cmd/site/internal/front"
+	"alexheld.io/cmd/site/internal/front"
 )
 
 var markdown = []byte(`---

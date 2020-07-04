@@ -4,7 +4,9 @@ import "testing"
 
 func TestLoadPeople(t *testing.T) {
 	people, err := loadPeople("../../signalboost.dhall")
-	if err != nil {t.Fatal(err)}
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	for _, person := range people {
 		t.Run(person.Name, func(t *testing.T) {

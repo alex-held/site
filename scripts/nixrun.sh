@@ -1,4 +1,5 @@
 #!/bin/sh
 
-cd "$(dirname "$0")"/..
-./bin/site
+go build ./...
+go install ./...
+~/.go/bin/site

@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"sort"
 	"time"
-
+	
 	"github.com/mxpv/patreon-go"
 	"golang.org/x/oauth2"
 	"within.website/ln"
@@ -47,6 +46,7 @@ func NewPatreonClient() (*patreon.Client, error) {
 }
 
 func GetPledges(pc *patreon.Client) ([]string, error) {
+	/*
 	campaign, err := pc.FetchCampaign()
 	if err != nil {
 		return nil, fmt.Errorf("campaign fetch error: %w", err)
@@ -88,6 +88,9 @@ func GetPledges(pc *patreon.Client) ([]string, error) {
 
 	sort.Strings(result)
 	return result, nil
+	*/
+	
+	return []string{"alexa-held"}, nil
 }
 
 type lnLoggingTransport struct{ next http.RoundTripper }

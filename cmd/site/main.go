@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -10,13 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"christine.website/cmd/site/internal/blog"
-	"christine.website/cmd/site/internal/middleware"
-	"christine.website/jsonfeed"
+	"alexheld.io/cmd/site/internal/middleware"
+	"alexheld.io/jsonfeed"
 	"github.com/gorilla/feeds"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/povilasv/prommod"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	blackfriday "github.com/russross/blackfriday"
 	"github.com/sebest/xff"
@@ -24,6 +22,8 @@ import (
 	"within.website/ln"
 	"within.website/ln/ex"
 	"within.website/ln/opname"
+
+	"alexheld.io/cmd/site/internal/blog"
 )
 
 var port = os.Getenv("PORT")
@@ -38,10 +38,11 @@ func main() {
 		"git_rev": gitRev,
 	})
 
-	_ = prometheus.Register(prommod.NewCollector("christine"))
+	//	_ = prometheus.Register(prommod.NewCollector("christine"))
 
 	s, err := Build()
 	if err != nil {
+		fmt.Printf("Site= %+v\nErr=%+v\nPort=%d\n", s, err.Error(), port)
 		ln.FatalErr(ctx, err, ln.Action("Build"))
 	}
 
@@ -55,7 +56,7 @@ func main() {
 	ln.FatalErr(ctx, http.ListenAndServe(":"+port, mux))
 }
 
-// Site is the parent object for https://christine.website's backend.
+// Site is the parent object for https://alexheld.io's backend.
 type Site struct {
 	Posts       blog.Posts
 	Talks       blog.Posts
@@ -108,6 +109,11 @@ var arbDate = time.Date(2020, time.May, 21, 0, 0, 0, 0, time.UTC)
 
 // Build creates a new Site instance or fails.
 func Build() (*Site, error) {
+
+	_ = os.Setenv("PATREON_CLIENT_ID", "1234")
+	_ = os.Setenv("PATREON_CLIENT_SECRET", "1234")
+	_ = os.Setenv("PATREON_ACCESS_TOKEN", "1234")
+	_ = os.Setenv("PATREON_REFRESH_TOKEN", "1234")
 	pc, err := NewPatreonClient()
 	if err != nil {
 		return nil, err
@@ -125,31 +131,31 @@ func Build() (*Site, error) {
 
 	smi := sitemap.New()
 	smi.Add(&sitemap.URL{
-		Loc:        "https://christine.website/resume",
+		Loc:        "https://alexheld.io/resume",
 		LastMod:    &arbDate,
 		ChangeFreq: sitemap.Monthly,
 	})
 
 	smi.Add(&sitemap.URL{
-		Loc:        "https://christine.website/contact",
+		Loc:        "https://alexheld.ioe/contact",
 		LastMod:    &arbDate,
 		ChangeFreq: sitemap.Monthly,
 	})
 
 	smi.Add(&sitemap.URL{
-		Loc:        "https://christine.website/",
+		Loc:        "https://alexheld.io/",
 		LastMod:    &arbDate,
 		ChangeFreq: sitemap.Monthly,
 	})
 
 	smi.Add(&sitemap.URL{
-		Loc:        "https://christine.website/patrons",
+		Loc:        "https://alexheld.io/patrons",
 		LastMod:    &arbDate,
 		ChangeFreq: sitemap.Weekly,
 	})
 
 	smi.Add(&sitemap.URL{
-		Loc:        "https://christine.website/blog",
+		Loc:        "https://alexheld.io/blog",
 		LastMod:    &arbDate,
 		ChangeFreq: sitemap.Weekly,
 	})
@@ -161,24 +167,24 @@ func Build() (*Site, error) {
 
 	s := &Site{
 		rssFeed: &feeds.Feed{
-			Title:       "Christine Dodrill's Blog",
-			Link:        &feeds.Link{Href: "https://christine.website/blog"},
+			Title:       "Alexander Held's Blog",
+			Link:        &feeds.Link{Href: "https://alexheld.io/blog"},
 			Description: "My blog posts and rants about various technology things.",
-			Author:      &feeds.Author{Name: "Christine Dodrill", Email: "me@christine.website"},
+			Author:      &feeds.Author{Name: "Alexander Held", Email: "contact@alexheld.io"},
 			Created:     bootTime,
-			Copyright:   "This work is copyright Christine Dodrill. My viewpoints are my own and not the view of any employer past, current or future.",
+			Copyright:   "This work is copyright Alexander Held. My viewpoints are my own and not the view of any employer past, current or future.",
 		},
 		jsonFeed: &jsonfeed.Feed{
 			Version:     jsonfeed.CurrentVersion,
-			Title:       "Christine Dodrill's Blog",
-			HomePageURL: "https://christine.website",
-			FeedURL:     "https://christine.website/blog.json",
+			Title:       "Alexander Held's Blog",
+			HomePageURL: "https://alexheld.io",
+			FeedURL:     "https://alexheld.io/blog.json",
 			Description: "My blog posts and rants about various technology things.",
 			UserComment: "This is a JSON feed of my blogposts. For more information read: https://jsonfeed.org/version/1",
 			Icon:        icon,
 			Favicon:     icon,
 			Author: jsonfeed.Author{
-				Name:   "Christine Dodrill",
+				Name:   "Alexander Held",
 				Avatar: icon,
 			},
 		},
@@ -227,15 +233,15 @@ func Build() (*Site, error) {
 	for _, item := range everything {
 		s.rssFeed.Items = append(s.rssFeed.Items, &feeds.Item{
 			Title:       item.Title,
-			Link:        &feeds.Link{Href: "https://christine.website/" + item.Link},
+			Link:        &feeds.Link{Href: "https://alexheld.io/" + item.Link},
 			Description: item.Summary,
 			Created:     item.Date,
 			Content:     string(item.BodyHTML),
 		})
 
 		s.jsonFeed.Items = append(s.jsonFeed.Items, jsonfeed.Item{
-			ID:            "https://christine.website/" + item.Link,
-			URL:           "https://christine.website/" + item.Link,
+			ID:            "https://alexheld.io/" + item.Link,
+			URL:           "https://alexheld.io/" + item.Link,
 			Title:         item.Title,
 			DatePublished: item.Date,
 			ContentHTML:   string(item.BodyHTML),
@@ -243,7 +249,7 @@ func Build() (*Site, error) {
 		})
 
 		smi.Add(&sitemap.URL{
-			Loc:        "https://christine.website/" + item.Link,
+			Loc:        "https://alexheld.io/" + item.Link,
 			LastMod:    &item.Date,
 			ChangeFreq: sitemap.Monthly,
 		})
@@ -261,7 +267,7 @@ func Build() (*Site, error) {
 	})
 	s.mux.Handle("/metrics", promhttp.Handler())
 	s.mux.Handle("/feeds", middleware.Metrics("feeds", s.renderTemplatePage("feeds.html", nil)))
-	s.mux.Handle("/patrons", middleware.Metrics("patrons", s.renderTemplatePage("patrons.html", s.patrons)))
+	//s.mux.Handle("/patrons", middleware.Metrics("patrons", s.renderTemplatePage("patrons.html", s.patrons)))
 	s.mux.Handle("/signalboost", middleware.Metrics("signalboost", s.renderTemplatePage("signalboost.html", s.SignalBoost)))
 	s.mux.Handle("/resume", middleware.Metrics("resume", s.renderTemplatePage("resume.html", s.Resume)))
 	s.mux.Handle("/blog", middleware.Metrics("blog", s.renderTemplatePage("blogindex.html", s.Posts)))
@@ -293,4 +299,4 @@ func Build() (*Site, error) {
 	return s, nil
 }
 
-const icon = "https://christine.website/static/img/avatar.png"
+const icon = "https://alexheld.io/static/img/avatar.png"
