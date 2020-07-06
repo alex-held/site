@@ -1,8 +1,6 @@
 #!/bin/sh
-
 set -e
 
-#image="xena/site"
 image="alexheld/site"
 
 docker build -t $image .
