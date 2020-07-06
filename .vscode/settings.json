@@ -1,8 +1,11 @@
 {
+    "[make]": {
+        "editor.insertSpaces": false
+    },
     "go.inferGopath": false,
     "editor.codeActionsOnSave": {
-        "source.fixAll": true,
-        "source.organizeImports": true
+        "source.fixAll": false,
+        "source.organizeImports": false
     },
     "go.testOnSave": false,
     "[go]": {

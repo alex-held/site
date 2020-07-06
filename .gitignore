@@ -17,6 +17,7 @@
 *.asar
 cw.tar
 .env
+.site
 .DS_Store
 /result-*
 /result

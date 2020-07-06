@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 	"time"
-	
+
 	"github.com/mxpv/patreon-go"
 	"golang.org/x/oauth2"
 	"within.website/ln"
@@ -47,49 +47,49 @@ func NewPatreonClient() (*patreon.Client, error) {
 
 func GetPledges(pc *patreon.Client) ([]string, error) {
 	/*
-	campaign, err := pc.FetchCampaign()
-	if err != nil {
-		return nil, fmt.Errorf("campaign fetch error: %w", err)
-	}
-
-	campaignID := campaign.Data[0].ID
-
-	cursor := ""
-	var result []string
-
-	for {
-		pledgesResponse, err := pc.FetchPledges(campaignID, patreon.WithPageSize(25), patreon.WithCursor(cursor))
+		campaign, err := pc.FetchCampaign()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("campaign fetch error: %w", err)
 		}
 
-		users := make(map[string]*patreon.User)
-		for _, item := range pledgesResponse.Included.Items {
-			u, ok := item.(*patreon.User)
-			if !ok {
-				continue
+		campaignID := campaign.Data[0].ID
+
+		cursor := ""
+		var result []string
+
+		for {
+			pledgesResponse, err := pc.FetchPledges(campaignID, patreon.WithPageSize(25), patreon.WithCursor(cursor))
+			if err != nil {
+				return nil, err
 			}
 
-			users[u.ID] = u
+			users := make(map[string]*patreon.User)
+			for _, item := range pledgesResponse.Included.Items {
+				u, ok := item.(*patreon.User)
+				if !ok {
+					continue
+				}
+
+				users[u.ID] = u
+			}
+
+			for _, pledge := range pledgesResponse.Data {
+				pid := pledge.Relationships.Patron.Data.ID
+				patronFullName := users[pid].Attributes.FullName
+
+				result = append(result, patronFullName)
+			}
+
+			cursor = pledgesResponse.Links.Next
+			if cursor == "" {
+				break
+			}
 		}
 
-		for _, pledge := range pledgesResponse.Data {
-			pid := pledge.Relationships.Patron.Data.ID
-			patronFullName := users[pid].Attributes.FullName
-
-			result = append(result, patronFullName)
-		}
-
-		cursor = pledgesResponse.Links.Next
-		if cursor == "" {
-			break
-		}
-	}
-
-	sort.Strings(result)
-	return result, nil
+		sort.Strings(result)
+		return result, nil
 	*/
-	
+
 	return []string{"alexa-held"}, nil
 }
 

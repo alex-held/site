@@ -5,18 +5,18 @@ if [[ -n "${GOENV+1}" ]]; then
 	deactivate
 fi
 
-export GOENV=site
+export GOENV=site2
 export GOENV_OLDPS1=$PS1
 export GOENV_OLDGOPATH=$GOPATH
 export GOENV_OLDPATH=$PATH
 
-export GOPATH=/Users/dev/.goenv/site
+export GOPATH=/Users/dev/.goenv/site2
 export PATH="$GOPATH/bin:$PATH"
 export PS1="($(basename $GOPATH))$PS1"
 
-mkdir -p $(dirname $GOPATH/src/github.com/alex-held/site)
-rm -f $GOPATH/src/github.com/alex-held/site
-ln -s /Users/dev/.go/src/github.com/alex-held/site $GOPATH/src/github.com/alex-held/site
+mkdir -p $(dirname $GOPATH/src/github.com/alex-held/site2)
+rm -f $GOPATH/src/github.com/alex-held/site2
+ln -s /Users/dev/.go/src/github.com/alex-held/site2 $GOPATH/src/github.com/alex-held/site2
 
 deactivate() {
 	export PS1=$GOENV_OLDPS1

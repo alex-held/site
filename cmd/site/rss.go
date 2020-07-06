@@ -78,14 +78,4 @@ func (s *Site) createJSONFeed(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	e := json.NewEncoder(w)
 	e.SetIndent("", "\t")
-	err := e.Encode(s.jsonFeed)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		ln.Error(ctx, err, ln.F{
-			"remote_addr": r.RemoteAddr,
-			"action":      "generating_jsonfeed",
-			"uri":         r.RequestURI,
-			"host":        r.Host,
-		})
-	}
 }

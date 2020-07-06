@@ -1,0 +1,67 @@
+# https://taskfile.dev
+
+version: "2"
+
+expansions: 3
+
+vars:
+  GIT_COMMIT:
+    sh: git log -n 1 --format=%h1
+  DOCKER_USERNAME: alexheld
+  REPO: site
+  IMAGE: '{{.DOCKER_USERNAME}}/{{.REPO}}:{{.GIT_COMMIT}}'
+
+tasks:
+
+  print:
+    desc: Prints the required build variables to the console. (DEBUG ONLY)
+    cmds:
+      - echo {{.DOCKER_USERNAME}}
+      - echo {{.DOCKER_PASSWORD}}
+      - echo {{.REPO}}
+      - echo {{.DOCKER_USERNAME}}
+      - echo {{.GIT_COMMIT}}
+      - echo {{.IMAGE}}
+
+  default:
+    cmds:
+      - task: test
+
+  go-get:
+    desc: Downloads all necessary dependencies for this project.
+    cmds:
+      - go mod tidy
+      - go gets -u ./... &
+
+  build:
+    deps: [go-get]
+    desc: Builds the Project
+    cmds:
+      - go build -v -i  ./... 
+
+
+  test:
+    desc: Runs test suite (verbose)
+    deps: [build]
+    cmds:
+      - go test ./...
+
+  fmt:
+    desc: Runs golint
+    cmds:
+      - go fmt -x -n ./...
+
+  docker-build:
+    desc: Builds a docker image and tags it
+    deps: [test]
+    cmds:
+      - docker build -t {{.IMAGE}} .
+
+  docker-publish:
+    preconditions:
+      - test -e {{.DOCKER_PASSWORD}}
+    desc: Publishes a new docker image to hub.docker.com
+    deps: [docker-build]
+    cmds:
+      - echo {{.DOCKER_PASSWORD}} | docker login -u {{.DOCKER_USERNAME}} --password-stdin
+      - docker publish {{.IMAGE}}

@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"alexheld.io/cmd/site/internal/middleware"
-	"alexheld.io/jsonfeed"
 	"github.com/gorilla/feeds"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -30,7 +29,7 @@ var port = os.Getenv("PORT")
 
 func main() {
 	if port == "" {
-		port = "29384"
+		port = "443"
 	}
 
 	ctx := ln.WithF(opname.With(context.Background(), "main"), ln.F{
@@ -65,10 +64,9 @@ type Site struct {
 	Series      []string
 	SignalBoost []Person
 
-	clacks   ClackSet
-	patrons  []string
-	rssFeed  *feeds.Feed
-	jsonFeed *jsonfeed.Feed
+	clacks  ClackSet
+	patrons []string
+	rssFeed *feeds.Feed
 
 	mux   *http.ServeMux
 	xffmw *xff.XFF
@@ -174,20 +172,7 @@ func Build() (*Site, error) {
 			Created:     bootTime,
 			Copyright:   "This work is copyright Alexander Held. My viewpoints are my own and not the view of any employer past, current or future.",
 		},
-		jsonFeed: &jsonfeed.Feed{
-			Version:     jsonfeed.CurrentVersion,
-			Title:       "Alexander Held's Blog",
-			HomePageURL: "https://alexheld.io",
-			FeedURL:     "https://alexheld.io/blog.json",
-			Description: "My blog posts and rants about various technology things.",
-			UserComment: "This is a JSON feed of my blogposts. For more information read: https://jsonfeed.org/version/1",
-			Icon:        icon,
-			Favicon:     icon,
-			Author: jsonfeed.Author{
-				Name:   "Alexander Held",
-				Avatar: icon,
-			},
-		},
+
 		mux:   http.NewServeMux(),
 		xffmw: xffmw,
 
@@ -239,15 +224,6 @@ func Build() (*Site, error) {
 			Content:     string(item.BodyHTML),
 		})
 
-		s.jsonFeed.Items = append(s.jsonFeed.Items, jsonfeed.Item{
-			ID:            "https://alexheld.io/" + item.Link,
-			URL:           "https://alexheld.io/" + item.Link,
-			Title:         item.Title,
-			DatePublished: item.Date,
-			ContentHTML:   string(item.BodyHTML),
-			Tags:          item.Tags,
-		})
-
 		smi.Add(&sitemap.URL{
 			Loc:        "https://alexheld.io/" + item.Link,
 			LastMod:    &item.Date,
@@ -276,7 +252,7 @@ func Build() (*Site, error) {
 	s.mux.Handle("/contact", middleware.Metrics("contact", s.renderTemplatePage("contact.html", nil)))
 	s.mux.Handle("/blog.rss", middleware.Metrics("blog.rss", http.HandlerFunc(s.createFeed)))
 	s.mux.Handle("/blog.atom", middleware.Metrics("blog.atom", http.HandlerFunc(s.createAtom)))
-	s.mux.Handle("/blog.json", middleware.Metrics("blog.json", http.HandlerFunc(s.createJSONFeed)))
+	//	s.mux.Handle("/blog.json", middleware.Metrics("blog.json", http.HandlerFunc(s.createJSONFeed)))
 	s.mux.Handle("/blog/", middleware.Metrics("blogpost", http.HandlerFunc(s.showPost)))
 	s.mux.Handle("/blog/series", http.HandlerFunc(s.listSeries))
 	s.mux.Handle("/blog/series/", http.HandlerFunc(s.showSeries))
