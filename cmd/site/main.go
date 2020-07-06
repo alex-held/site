@@ -42,7 +42,7 @@ func main() {
 
 	s, err := Build()
 	if err != nil {
-		fmt.Printf("Site= %+v\nErr=%+v\nPort=%d\n", s, err.Error(), port)
+		fmt.Printf("Site= %+v\nErr=%+v\nPort=%v\n", s, err.Error(), port)
 		ln.FatalErr(ctx, err, ln.Action("Build"))
 	}
 
