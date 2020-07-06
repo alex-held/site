@@ -1,0 +1,21 @@
+#!make
+DOCKER_USERNAME="alexheld"
+REPO="site"
+IMAGE=$(DOCKER_USERNAME)/$(REPO)
+TAG=()
+
+all:
+	@echo $(DOCKER_USERNAME)
+	@echo $(IMAGE)
+	@echo $(TAG)
+	@echo $(REPO)
+	@echo $(TAG)
+
+.PHONY: docker-build
+docker-build:
+	@docker build -t $(IMAGE) .
+
+.PHONY: docker-publish
+docker-publish:
+	@echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USERNAME) --password-stdin
+	@docker push $(IMAGE)
