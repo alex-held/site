@@ -1,7 +1,10 @@
 #!/bin/sh
 set -e
 
-image="alexheld/site"
+DOCKER_USERNAME="alexheld"
+REPO="site"
+IMAGE="$DOCKER_USERNAME/$REPO"
 
-docker build -t $image .
-exec docker run --rm -itp 5030:5000 $image
+docker build -t alexheld/site:$(echo $GITHUB_SHA | head -c7) .
+echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+docker push $IMAGE
