@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"os"
 	"sort"
-	"strings"
 	"time"
 
 	"alexheld.io/cmd/site/internal/middleware"
+	"christine.website/jsonfeed"
 	"github.com/gorilla/feeds"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -19,7 +19,6 @@ import (
 	"github.com/sebest/xff"
 	"github.com/snabb/sitemap"
 	"within.website/ln"
-	"within.website/ln/ex"
 	"within.website/ln/opname"
 
 	"alexheld.io/cmd/site/internal/blog"
@@ -57,19 +56,13 @@ func main() {
 
 // Site is the parent object for https://alexheld.io's backend.
 type Site struct {
-	Posts       blog.Posts
-	Talks       blog.Posts
-	Gallery     blog.Posts
-	Resume      template.HTML
-	Series      []string
-	SignalBoost []Person
-
-	clacks  ClackSet
-	patrons []string
-	rssFeed *feeds.Feed
-
-	mux   *http.ServeMux
-	xffmw *xff.XFF
+	Posts    blog.Posts
+	Resume   template.HTML
+	Series   []string
+	rssFeed  *feeds.Feed
+	jsonFeed *jsonfeed.Feed
+	mux      *http.ServeMux
+	xffmw    *xff.XFF
 }
 
 var gitRev = os.Getenv("GIT_REV")
@@ -94,38 +87,12 @@ func (s *Site) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("X-Hacker", "If you are reading this, check out /signalboost to find people for your team")
 
-	s.clacks.Middleware(
-		middleware.RequestID(
-			s.xffmw.Handler(
-				ex.HTTPLog(s.mux),
-			),
-		),
-	).ServeHTTP(w, r)
 }
 
 var arbDate = time.Date(2020, time.May, 21, 0, 0, 0, 0, time.UTC)
 
 // Build creates a new Site instance or fails.
 func Build() (*Site, error) {
-
-	_ = os.Setenv("PATREON_CLIENT_ID", "1234")
-	_ = os.Setenv("PATREON_CLIENT_SECRET", "1234")
-	_ = os.Setenv("PATREON_ACCESS_TOKEN", "1234")
-	_ = os.Setenv("PATREON_REFRESH_TOKEN", "1234")
-	pc, err := NewPatreonClient()
-	if err != nil {
-		return nil, err
-	}
-
-	pledges, err := GetPledges(pc)
-	if err != nil {
-		return nil, err
-	}
-
-	people, err := loadPeople("./signalboost.dhall")
-	if err != nil {
-		return nil, err
-	}
 
 	smi := sitemap.New()
 	smi.Add(&sitemap.URL{
@@ -147,12 +114,6 @@ func Build() (*Site, error) {
 	})
 
 	smi.Add(&sitemap.URL{
-		Loc:        "https://alexheld.io/patrons",
-		LastMod:    &arbDate,
-		ChangeFreq: sitemap.Weekly,
-	})
-
-	smi.Add(&sitemap.URL{
 		Loc:        "https://alexheld.io/blog",
 		LastMod:    &arbDate,
 		ChangeFreq: sitemap.Weekly,
@@ -170,41 +131,37 @@ func Build() (*Site, error) {
 			Description: "My blog posts and rants about various technology things.",
 			Author:      &feeds.Author{Name: "Alexander Held", Email: "contact@alexheld.io"},
 			Created:     bootTime,
-			Copyright:   "This work is copyright Alexander Held. My viewpoints are my own and not the view of any employer past, current or future.",
+			Copyright:   "This work is copyright Alexander Held. My viewpoints are my own and not the view of any employer past, current or future.", // nolint:lll
+        },
+		jsonFeed: &jsonfeed.Feed{
+			Version:     jsonfeed.CurrentVersion,
+			Title:       "Alexander Held's Blog",
+			HomePageURL: "https://alexheld.io",
+			FeedURL:     "https://alexheld.io/blog.json",
+			Description: "My blog posts and rants about various technology things.",
+			UserComment: "This is a JSON feed of my blogposts. For more information read: https://jsonfeed.org/version/1",
+			Icon:        icon,
+			Favicon:     icon,
+			Author: jsonfeed.Author{
+				Name:   "Alexander Held",
+				Avatar: icon,
+			},
 		},
-
 		mux:   http.NewServeMux(),
 		xffmw: xffmw,
-
-		clacks:      ClackSet(strings.Split(envOr("CLACK_SET", "Ashlynn"), ",")),
-		patrons:     pledges,
-		SignalBoost: people,
 	}
 
 	posts, err := blog.LoadPosts("./blog/", "blog")
 	if err != nil {
 		return nil, err
 	}
+
 	s.Posts = posts
 	s.Series = posts.Series()
 	sort.Strings(s.Series)
 
-	talks, err := blog.LoadPosts("./talks", "talks")
-	if err != nil {
-		return nil, err
-	}
-	s.Talks = talks
-
-	gallery, err := blog.LoadPosts("./gallery", "gallery")
-	if err != nil {
-		return nil, err
-	}
-	s.Gallery = gallery
-
 	var everything blog.Posts
 	everything = append(everything, posts...)
-	everything = append(everything, talks...)
-	everything = append(everything, gallery...)
 
 	sort.Sort(sort.Reverse(everything))
 
@@ -224,6 +181,14 @@ func Build() (*Site, error) {
 			Content:     string(item.BodyHTML),
 		})
 
+		s.jsonFeed.Items = append(s.jsonFeed.Items, jsonfeed.Item{
+			ID:            "https://alexheld.io/" + item.Link,
+			URL:           "https://alexheld.io/" + item.Link,
+			Title:         item.Title,
+			DatePublished: item.Date,
+			ContentHTML:   string(item.BodyHTML),
+			Tags:          item.Tags,
+		})
 		smi.Add(&sitemap.URL{
 			Loc:        "https://alexheld.io/" + item.Link,
 			LastMod:    &item.Date,
@@ -241,23 +206,18 @@ func Build() (*Site, error) {
 
 		s.renderTemplatePage("index.html", nil).ServeHTTP(w, r)
 	})
+
 	s.mux.Handle("/metrics", promhttp.Handler())
 	s.mux.Handle("/feeds", middleware.Metrics("feeds", s.renderTemplatePage("feeds.html", nil)))
-	//s.mux.Handle("/patrons", middleware.Metrics("patrons", s.renderTemplatePage("patrons.html", s.patrons)))
-	s.mux.Handle("/signalboost", middleware.Metrics("signalboost", s.renderTemplatePage("signalboost.html", s.SignalBoost)))
 	s.mux.Handle("/resume", middleware.Metrics("resume", s.renderTemplatePage("resume.html", s.Resume)))
 	s.mux.Handle("/blog", middleware.Metrics("blog", s.renderTemplatePage("blogindex.html", s.Posts)))
-	s.mux.Handle("/talks", middleware.Metrics("talks", s.renderTemplatePage("talkindex.html", s.Talks)))
-	s.mux.Handle("/gallery", middleware.Metrics("gallery", s.renderTemplatePage("galleryindex.html", s.Gallery)))
 	s.mux.Handle("/contact", middleware.Metrics("contact", s.renderTemplatePage("contact.html", nil)))
 	s.mux.Handle("/blog.rss", middleware.Metrics("blog.rss", http.HandlerFunc(s.createFeed)))
 	s.mux.Handle("/blog.atom", middleware.Metrics("blog.atom", http.HandlerFunc(s.createAtom)))
-	//	s.mux.Handle("/blog.json", middleware.Metrics("blog.json", http.HandlerFunc(s.createJSONFeed)))
+	s.mux.Handle("/blog.json", middleware.Metrics("blog.json", http.HandlerFunc(s.createJSONFeed)))
 	s.mux.Handle("/blog/", middleware.Metrics("blogpost", http.HandlerFunc(s.showPost)))
 	s.mux.Handle("/blog/series", http.HandlerFunc(s.listSeries))
 	s.mux.Handle("/blog/series/", http.HandlerFunc(s.showSeries))
-	s.mux.Handle("/talks/", middleware.Metrics("talks", http.HandlerFunc(s.showTalk)))
-	s.mux.Handle("/gallery/", middleware.Metrics("gallery", http.HandlerFunc(s.showGallery)))
 	s.mux.Handle("/css/", http.FileServer(http.Dir(".")))
 	s.mux.Handle("/static/", http.FileServer(http.Dir(".")))
 	s.mux.HandleFunc("/sw.js", func(w http.ResponseWriter, r *http.Request) {

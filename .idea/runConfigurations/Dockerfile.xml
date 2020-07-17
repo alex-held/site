@@ -4,26 +4,18 @@
       <settings>
         <option name="imageTag" value="alexheld/site" />
         <option name="buildCliOptions" value="" />
-        <option name="command" value="" />
-        <option name="containerName" value="mysite" />
+        <option name="command" value=" bash" />
+        <option name="containerName" value="site" />
         <option name="entrypoint" value="" />
-        <option name="envVars">
-          <list>
-            <DockerEnvVarImpl>
-              <option name="name" value="PATREON_CLIENT_ID" />
-              <option name="value" value="1234" />
-            </DockerEnvVarImpl>
-          </list>
-        </option>
         <option name="portBindings">
           <list>
             <DockerPortBindingImpl>
-              <option name="containerPort" value="5000" />
-              <option name="hostPort" value="5030" />
+              <option name="containerPort" value="443" />
+              <option name="hostPort" value="5050" />
             </DockerPortBindingImpl>
           </list>
         </option>
-        <option name="commandLineOptions" value="" />
+        <option name="commandLineOptions" value="-i" />
         <option name="sourceFilePath" value="Dockerfile" />
       </settings>
     </deployment>

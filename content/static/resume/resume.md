@@ -1,14 +1,13 @@
-# Christine Dodrill
+# Alexander Held
 
-#### Full-stack Engineer
+#### Software Solutions Architect
+###### with development background, mostly in distributed systems 
 
-##### Montreal, QC &emsp; [christine.website][homepage]
+##### 🏡 Cologne, Germany &emsp; [alexheld.io][homepage]
 
-`Docker`, `Git`, `Go`, `Rust`, `C`, `Stenography`, `DevOps`, `Heroku`, `Continuous
-Integration/Delivery`, `WebAssembly`, `Lua`, `Mindfulness`, `HTTP/2`, `Alpine
-Linux`, `Ubuntu`, `Linux`, `GraphViz`, `Progressive Web Apps`, `yaml`, `SQL`,
-`Postgres`, `MySQL`, `SQLite`, `Ordained Minister`, `Dudeism`, `Tech Writing`,
-`Kubernetes`, `Command Line Apps`
+`Kubernetes`, `Docker`, `Git(-Ops)`, `Go`, `C#`, `kotlin`, `java`, `DevOps & Automation`, `Heroku`, `Continuous
+Integration/Delivery`, `G-RPC`, `RabbitMQ`, `Azure`,`Mindfulness`, `HTTP/2`, `*nix head`, `yaml`, `MongoDB`, `SQL variants` `functional programming`, 
+`Tech Writing`,`Command Line Apps`
 
 ## Experience
 
@@ -206,8 +205,7 @@ I have gotten to the front page of [Hacker News](https://news.ycombinator.com) s
 
 I am an ordained minister with the [Church of the Latter-day Dude](https://dudeism.com). This allows me to officiate religious ceremonies in at least the United States. I would be honored if you were to choose me to officiate anything for any reason. Please [contact](/contact) me if you have any questions.
 
-[homepage]: https://christine.website
-[twitter]: https://twitter.com/theprincessxena
-[twit]: http://cdn-careers.sstatic.net/careers/Img/icon-twitter.png?v=b1bd58ad2034
+[homepage]: https://alexheld.io
+[twitter]: https://twitter.com/0_alexheld
 [heroku]: https://www.heroku.com
-[lightspeedhq]: https://www.lightspeedhq.com
+[keybase]: https://keybase.io/alexheld

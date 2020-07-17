@@ -1,4 +1,6 @@
 backend
 frontend
 .env
-.git
+goenv
+.vscode
+

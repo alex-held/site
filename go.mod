@@ -3,6 +3,7 @@ module alexheld.io
 go 1.14
 
 require (
+	christine.website v1.4.0
 	github.com/celrenheit/sandflake v0.0.0-20190410195419-50a943690bc2
 	github.com/gorilla/feeds v1.1.1
 	github.com/joho/godotenv v1.3.0

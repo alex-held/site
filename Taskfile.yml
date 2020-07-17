@@ -37,7 +37,7 @@ tasks:
     deps: [go-get]
     desc: Builds the Project
     cmds:
-      - go build -v -i  ./... 
+      - go build -v -i  ./...
 
 
   test:
