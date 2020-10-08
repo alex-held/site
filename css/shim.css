@@ -18,3 +18,13 @@ img {
 	max-width: 100%;
 	padding: 1em;
 }
+
+.conversation {
+  display: flex;
+}
+
+.conversation-picture {
+  flex: 1;
+  min-width: 9rem;
+  max-width: calc(((70rem - 2rem)/6));
+}
